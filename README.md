@@ -16,7 +16,8 @@ ipWhitelist={"127.0.0.1","192.168.1.0-192.168.255.255"}
 2、增加User-Agent白名单，用来过滤蜘蛛的。
 在wafconf文件夹下white-user-agent文件中添加
 
-3、增加server_name白名单
+3、增加server_name白名单。
+在wafconf/white_servername
 
 
 
