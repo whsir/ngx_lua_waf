@@ -10,7 +10,7 @@ UrlDeny = optionIsOn(UrlDeny)
 PostCheck = optionIsOn(postMatch)
 CookieCheck = optionIsOn(CookieMatch)
 WhiteCheck = optionIsOn(whiteModule)
-WhiteServername = optionIsOn(whiteServername)
+WhiteHostCheck = optionIsOn(whiteHostModule)
 PathInfoFix = optionIsOn(PathInfoFix)
 attacklog = optionIsOn(attacklog)
 CCDeny = optionIsOn(CCDeny)
@@ -249,21 +249,17 @@ function whiteua()
     return false
 end
 
-function white_servername()
-    if WhiteServername then
-    	host = ngx.req.get_headers()["Host"]
-    	if host == nil then
-    	    return false;
-        end
-    	if white_servername_rules ~= nil then
-    	    for _, rule in pairs(white_servername_rules) do
-    	    	if ngxmatch(host, rule, "isjo") then
-    	    	    return true
-    	    	end
-            end
-        end
-        return false
-    end
+function whitehost()
+	if WhiteHostCheck then
+	    local items = Set(hostWhiteList)
+	    for host in pairs(items) do
+	    	if ngxmatch(ngx.var.host, host, "isjo") then
+				log('POST',ngx.var.request_uri,"-","white host".. host)
+	    		return true
+	    	end
+	    end
+	end
+	return false
 end
 
 function blockip()
