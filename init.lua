@@ -4,11 +4,11 @@ local ngxmatch=ngx.re.match
 local unescape=ngx.unescape_uri
 local get_headers = ngx.req.get_headers
 local optionIsOn = function (options) return options == "on" and true or false end
-logpath = logdir
+logpath = logdir 
 rulepath = RulePath
 UrlDeny = optionIsOn(UrlDeny)
 PostCheck = optionIsOn(postMatch)
-CookieCheck = optionIsOn(CookieMatch)
+CookieCheck = optionIsOn(cookieMatch)
 WhiteCheck = optionIsOn(whiteModule)
 WhiteHostCheck = optionIsOn(whiteHostModule)
 PathInfoFix = optionIsOn(PathInfoFix)
@@ -18,24 +18,12 @@ Redirect=optionIsOn(Redirect)
 function getClientIp()
         IP = ngx.req.get_headers()["X-Real-IP"]
         if IP == nil then
-                IP  = ngx.var.remote_addr
+                IP  = ngx.var.remote_addr 
         end
         if IP == nil then
                 IP  = "unknown"
         end
         return IP
-end
-function ipToDecimal(ckip)
-    local n = 4
-    local decimalNum = 0
-    local pos = 0
-    for s, e in function() return string.find(ckip, '.', pos, true) end do
-        n = n - 1
-        decimalNum = decimalNum + string.sub(ckip, pos, s-1) * (256 ^ n)
-        pos = e + 1
-        if n == 1 then decimalNum = decimalNum + string.sub(ckip, pos, string.len(ckip)) end
-    end
-    return decimalNum
 end
 function write(logfile,msg)
     local fd = io.open(logfile,"ab")
@@ -59,6 +47,19 @@ function log(method,url,data,ruletag)
         write(filename,line)
     end
 end
+
+function ipToDecimal(ckip)
+    local n = 4
+    local decimalNum = 0
+    local pos = 0
+    for s, e in function() return string.find(ckip, '.', pos, true) end do
+        n = n - 1
+        decimalNum = decimalNum + string.sub(ckip, pos, s-1) * (256 ^ n)
+        pos = e + 1
+        if n == 1 then decimalNum = decimalNum + string.sub(ckip, pos, string.len(ckip)) end
+    end
+    return decimalNum
+end
 ------------------------------------规则读取函数-------------------------------------------------------------------
 function read_rule(var)
     file = io.open(rulepath..'/'..var,"r")
@@ -78,10 +79,8 @@ argsrules=read_rule('args')
 uarules=read_rule('user-agent')
 whiteuarules=read_rule('white-user-agent')
 wturlrules=read_rule('whiteurl')
-white_servername_rules = read_rule('white_servername')
 postrules=read_rule('post')
 ckrules=read_rule('cookie')
-
 
 function say_html()
     if Redirect then
@@ -104,6 +103,19 @@ function whiteurl()
     return false
 end
 
+function whitehost()
+	if WhiteHostCheck then
+	    local items = Set(hostWhiteList)
+	    for host in pairs(items) do
+	    	if ngxmatch(ngx.var.host, host, "isjo") then
+				log('POST',ngx.var.request_uri,"-","white host".. host)
+	    		return true
+	    	end
+	    end
+	end
+	return false
+end
+
 function args()
     for _,rule in pairs(argsrules) do
         local args = ngx.req.get_uri_args()
@@ -124,7 +136,6 @@ function args()
     end
     return false
 end
-
 
 function url()
     if UrlDeny then
@@ -152,6 +163,7 @@ function ua()
     end
     return false
 end
+
 function body(data)
     for _,rule in pairs(postrules) do
         if rule ~="" and data~="" and ngxmatch(unescape(data),rule,"imjo") then
@@ -162,11 +174,12 @@ function body(data)
     end
     return false
 end
+
 function cookie()
     local ck = ngx.var.http_cookie
     if CookieCheck and ck then
         for _,rule in pairs(ckrules) do
-            if rule ~="" and ngxmatch(ck,rule,"imjo") then
+            if rule ~="" and ngxmatch(ck,rule,"isjo") then
                 log('Cookie',ngx.var.request_uri,"-",rule)
                 say_html()
             return true
@@ -198,6 +211,18 @@ function denycc()
     return false
 end
 
+function whiteua()
+    local ua = ngx.var.http_user_agent
+    if ua ~= nil then
+        for _,rule in pairs(whiteuarules) do
+            if rule ~="" and ngxmatch(ua,rule,"isjo") then
+                return true
+            end
+        end
+    end
+    return false
+end
+
 function get_boundary()
     local header = get_headers()["content-type"]
     if not header then
@@ -214,52 +239,6 @@ function get_boundary()
     end
 
     return match(header, ";%s*boundary=([^\",;]+)")
-end
-
-function whiteip()
-    if next(ipWhitelist) ~= nil then
-        local cIP = getClientIp()
-        local numIP = 0
-        if cIP ~= "unknown" then numIP = tonumber(ipToDecimal(cIP))  end
-        for _,ip in pairs(ipWhitelist) do
-            local s, e = string.find(ip, '-', 0, true)
-            if s == nil and cIP == ip then
-                return true
-            elseif s ~= nil then
-                sIP = tonumber(ipToDecimal(string.sub(ip, 0, s - 1)))
-                eIP = tonumber(ipToDecimal(string.sub(ip, e + 1, string.len(ip))))
-                if numIP >= sIP and numIP <= eIP then
-                   return true
-                end
-            end
-        end
-    end
-    return false
-end
-
-function whiteua()
-    local ua = ngx.var.http_user_agent
-    if ua ~= nil then
-        for _,rule in pairs(whiteuarules) do
-            if rule ~="" and ngxmatch(ua,rule,"isjo") then
-                return true
-            end
-        end
-    end
-    return false
-end
-
-function whitehost()
-	if WhiteHostCheck then
-	    local items = Set(hostWhiteList)
-	    for host in pairs(items) do
-	    	if ngxmatch(ngx.var.host, host, "isjo") then
-				log('POST',ngx.var.request_uri,"-","white host".. host)
-	    		return true
-	    	end
-	    end
-	end
-	return false
 end
 
 function blockip()
@@ -284,3 +263,44 @@ function blockip()
     end
         return false
 end
+
+function fileExtCheck(ext)
+    local items = Set(black_fileExt)
+    ext=string.lower(ext)
+    if ext then
+        for rule in pairs(items) do
+            if ngx.re.match(ext,rule,"isjo") then
+	        log('POST',ngx.var.request_uri,"-","file attack with ext "..ext)
+            say_html()
+            end
+        end
+    end
+    return false
+end
+function Set (list)
+  local set = {}
+  for _, l in ipairs(list) do set[l] = true end
+  return set
+end
+
+function whiteip()
+    if next(ipWhitelist) ~= nil then
+        local cIP = getClientIp()
+        local numIP = 0
+        if cIP ~= "unknown" then numIP = tonumber(ipToDecimal(cIP))  end
+        for _,ip in pairs(ipWhitelist) do
+            local s, e = string.find(ip, '-', 0, true)
+            if s == nil and cIP == ip then
+                return true
+            elseif s ~= nil then
+                sIP = tonumber(ipToDecimal(string.sub(ip, 0, s - 1)))
+                eIP = tonumber(ipToDecimal(string.sub(ip, e + 1, string.len(ip))))
+                if numIP >= sIP and numIP <= eIP then
+                   return true
+                end
+            end
+        end
+    end
+    return false
+end
+
