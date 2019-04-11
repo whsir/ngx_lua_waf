@@ -5,7 +5,7 @@
 安装配置可参考：https://blog.whsir.com/post-4141.html
 
 
-ngx_lua_waf改版基于原ngx_lua_waf(https://github.com/loveshell/ngx_lua_waf)作者二次更改，代码很简单，高性能和轻量级。
+ngx_lua_waf改版基于原[ngx_lua_waf](https://github.com/loveshell/ngx_lua_waf)作者二次更改，代码很简单，高性能和轻量级。
 
 
 增加功能如下：
