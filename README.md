@@ -10,14 +10,13 @@
 
 增加功能如下：
 
-1、增加黑白名单网段IP限制，能力有限，网段不能写成192.168.1.0/24，只能写成192.168.1.0-192.168.255.255了。
-ipWhitelist={"127.0.0.1","192.168.1.0-192.168.255.255"}
+1、增加黑白名单网段IP限制，能力有限，网段不能写成172.16.1.0/24，只能写成172.16.1.0-172.16.1.255了。
+ipWhitelist={"127.0.0.1","172.16.1.0-172.16.1.255"}
 
 2、增加User-Agent白名单，用来过滤蜘蛛的。
 在wafconf文件夹下white-user-agent文件中添加
 
 3、增加server_name白名单。
-在wafconf/white_servername
 
 
 
@@ -79,7 +78,7 @@ nginx安装路径假设为:/usr/local/nginx/conf/
         --是否拦截post攻击
         whiteModule = "on" 
         --是否开启URL白名单
-        whiteServername = "off" 
+        whiteHostModule="off"
         --是否开启主机(对应nginx里面的server_name)白名单
         black_fileExt={"php","jsp"}
         --填写可上传文件后缀类型
@@ -87,6 +86,8 @@ nginx安装路径假设为:/usr/local/nginx/conf/
         --ip白名单，多个ip用逗号分隔
         ipBlocklist={"1.0.0.1","2.0.0.0-2.0.0.255"}
         --ip黑名单，多个ip用逗号分隔
+		hostWhiteList = {"blog.whsir.com","down.whsir.com"}
+        --server_name白名单，多个用逗号分隔
         CCDeny="on"
         --是否开启拦截cc攻击(需要nginx.conf的http段增加lua_shared_dict limit 10m;)
         CCrate = "100/60"
