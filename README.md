@@ -2,7 +2,7 @@
 [![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu) 
 
 
-
+安装配置可参考：https://blog.whsir.com/post-4141.html
 
 
 基于原ngx_lua_waf作者二次更改，代码很简单，高性能和轻量级。
