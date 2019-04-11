@@ -7,8 +7,8 @@ local optionIsOn = function (options) return options == "on" and true or false e
 logpath = logdir 
 rulepath = RulePath
 UrlDeny = optionIsOn(UrlDeny)
-PostCheck = optionIsOn(postMatch)
-CookieCheck = optionIsOn(cookieMatch)
+PostCheck = optionIsOn(PostMatch)
+CookieCheck = optionIsOn(CookieMatch)
 WhiteCheck = optionIsOn(whiteModule)
 WhiteHostCheck = optionIsOn(whiteHostModule)
 PathInfoFix = optionIsOn(PathInfoFix)
