@@ -20,9 +20,9 @@ ipWhitelist={"127.0.0.1","172.16.1.0-172.16.1.255"}
 
 
 
-目前我的whsir一键包默认的nginx已经集成了此版本
+目前我的wlnmp一键包默认的nginx已经集成了此版本
 
-whsir一键包，支持lnmp环境通过yum方式一键快速部署：https://bbs.whsir.com/thread-1-1-1.html
+wlnmp一键包，支持lnmp环境通过yum方式一键快速部署：https://www.wlnmp.com/
 
 
 ###用途：
